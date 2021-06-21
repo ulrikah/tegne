@@ -1,12 +1,12 @@
 <script>
     export let resize = true;
-    import newPaperCanvas from "./paperCanvas.js";
+    import paperCanvas from "./paperCanvas.js";
 </script>
 
 {#if !resize}
-    <canvas use:newPaperCanvas />
+    <canvas use:paperCanvas />
 {:else}
-    <canvas use:newPaperCanvas resize />
+    <canvas use:paperCanvas resize />
 {/if}
 
 <style>
@@ -14,5 +14,8 @@
     canvas[resize] {
         width: 100%;
         height: 100%;
+    }
+    canvas {
+        border: 1px solid black;
     }
 </style>
