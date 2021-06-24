@@ -1,25 +1,30 @@
 import paper from "paper";
+import { Point, PointText } from "paper/dist/paper-core";
+
 
 const paperCanvas = () => {
     const canvas = document.querySelector("canvas");
-    const points = [];
+    let points = [];
     paper.setup(canvas);
-    const path = new paper.Path();
-    path.strokeColor = new paper.Color(0.8, 0.2, 0.0, 0.8);
+    const path = new paper.Path({ strokeColor : 'black'});
 
-    const width = paper.view.viewSize.width;
-    const height = paper.view.viewSize.height;
+    const drawSegmentsFromPoints = (points : paper.Point[]) => {
+        points.forEach((point) => {
+            path.add(point);
+        })
+    }
 
-    const start = new paper.Point(0, height / 2);
-    path.moveTo(start);
+    paper.view.onMouseDown = (event: paper.MouseEvent) => {
+        points = [];
+        path.removeSegments()
+    }
 
-    for (let x = 0; x < width; x++) {
-        const newPoint = new paper.Point([
-            x,
-            Math.cos(Math.floor(x / 3)) * 0.1 * (height / 2),
-        ]);
-        points.push(newPoint);
-        path.lineTo(start.add(newPoint));
+    paper.view.onMouseDrag = (event : paper.ToolEvent) => {
+        points.push(event.point)
+    }
+
+    paper.view.onMouseUp = (event: paper.MouseEvent) => {
+        drawSegmentsFromPoints(points)
     }
 
     document.querySelector('button').addEventListener('click', function() {
