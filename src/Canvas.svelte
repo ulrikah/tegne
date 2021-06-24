@@ -3,6 +3,7 @@
     import paperCanvas from "./paperCanvas.js";
 </script>
 
+<button>Turn up the volume</button>
 {#if !resize}
     <canvas use:paperCanvas />
 {:else}
