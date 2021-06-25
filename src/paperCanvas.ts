@@ -1,9 +1,7 @@
 import paper from "paper";
-import { Point, PointText } from "paper/dist/paper-core";
 
 
-const paperCanvas = () => {
-    const canvas = document.querySelector("canvas");
+const paperCanvas = (canvas : HTMLCanvasElement) => {
     let points = [];
     paper.setup(canvas);
     const path = new paper.Path({ strokeColor : 'black'});
@@ -13,7 +11,6 @@ const paperCanvas = () => {
             path.add(point);
         })
     }
-
     paper.view.onMouseDown = (event: paper.MouseEvent) => {
         points = [];
         path.removeSegments()
@@ -27,39 +24,50 @@ const paperCanvas = () => {
         drawSegmentsFromPoints(points)
     }
 
-    document.querySelector('button').addEventListener('click', function() {
-        // could sampleRate simply be the width of the window?
-        // would yield very poor quality, but practical for first iterations
-        const durationSeconds = 2.0;
-        const channels = 1;
-        const sampleRate = 22050;
-        let audioCtx = new window.AudioContext({ sampleRate: sampleRate });
-        let frameCount = audioCtx.sampleRate * durationSeconds;
-        let myArrayBuffer = audioCtx.createBuffer(
-            channels,
-            frameCount,
-            audioCtx.sampleRate
-            );
-            
-            for (let channel = 0; channel < channels; channel++) {
-                let nowBuffering = myArrayBuffer.getChannelData(channel);
-                for (let i = 0; i < frameCount; i++) {
-                    // TODO: interpolate somewhere
-                    // nowBuffering[i] = points[i];
-                    nowBuffering[i] = Math.sin(Math.floor(i / 10)) - 0.5;
-                }
-            }
-            
-            let audioSource = audioCtx.createBufferSource();
-            audioSource.buffer = myArrayBuffer;
-            audioSource.connect(audioCtx.destination);
-            audioSource.start();
-            
-            audioSource.onended = () => {
-                console.log("White noise finished");
-            };
-    });
+    beep()
 };
+
+
+const beep = () => {
+    const button = document.querySelector('button');
+    if (button) {    
+        button.addEventListener('click', function() {
+            // could sampleRate simply be the width of the window?
+            // would yield very poor quality, but practical for first iterations
+            const durationSeconds = 2.0;
+            const channels = 1;
+            const sampleRate = 22050;
+            let audioCtx = new window.AudioContext({ sampleRate: sampleRate });
+            let frameCount = audioCtx.sampleRate * durationSeconds;
+            let myArrayBuffer = audioCtx.createBuffer(
+                channels,
+                frameCount,
+                audioCtx.sampleRate
+                );
+                
+                for (let channel = 0; channel < channels; channel++) {
+                    let nowBuffering = myArrayBuffer.getChannelData(channel);
+                    for (let i = 0; i < frameCount; i++) {
+                        // TODO: interpolate somewhere
+                        // nowBuffering[i] = points[i];
+                        nowBuffering[i] = Math.sin(Math.floor(i / 10)) - 0.5;
+                    }
+                }
+                
+                let audioSource = audioCtx.createBufferSource();
+                audioSource.buffer = myArrayBuffer;
+                audioSource.connect(audioCtx.destination);
+                audioSource.start();
+                
+                audioSource.onended = () => {
+                    console.log("White noise finished");
+                };
+            });
+    } else {
+        console.warn("No button element found to use to activate the audio context")
+    }
+}
+
 
 const resample = (samples: []): [] => {
     // TODO: resample values in a list of samples to fit the desired range
