@@ -1,8 +1,8 @@
 import paper from "paper";
 
 let waveform: Array<paper.Point> = [];
-let startX: number = 300,
-    endX: number = 600;
+let startX: number = 400,
+    endX: number = startX + 300;
 const sampleRate = 22050;
 let audioCtx: AudioContext;
 let audioSource: AudioBufferSourceNode;
@@ -34,6 +34,17 @@ const noise = () =>
 const paperCanvas = (canvas: HTMLCanvasElement) => {
     paper.setup(canvas);
     const tool = new paper.Tool();
+
+    const instructionText = new paper.PointText({
+        point: new paper.Point(
+            paper.view.viewSize.width / 10,
+            paper.view.viewSize.height / 10
+        ),
+        content:
+            "Press the canvas to draw new waveforms.\nUse the arrow keys to move the sample slice",
+        justification: "left",
+        fontSize: 15,
+    });
 
     const path = new paper.Path({ strokeColor: "black" });
     let startLinePath = new paper.Path.Line(
@@ -96,6 +107,9 @@ const paperCanvas = (canvas: HTMLCanvasElement) => {
     tool.onKeyUp = (event: paper.KeyEvent) => {
         if ([UP, RIGHT, DOWN, LEFT].includes(event.key)) {
             beep();
+            if (instructionText) {
+                instructionText.visible = false;
+            }
         }
     };
 
