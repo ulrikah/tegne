@@ -1,15 +1,22 @@
 import paper from "paper";
 
 let waveform: Array<paper.Point> = [];
+let startX: number = 300,
+    endX: number = 600;
 const sampleRate = 22050;
 let audioCtx: AudioContext;
 let audioSource: AudioBufferSourceNode;
 let hasAudioContextStarted = false;
 
+const UP = "up";
+const RIGHT = "right";
+const LEFT = "left";
+const DOWN = "down";
+
 const sine = () =>
     Array.from(
         { length: paper.view.viewSize.width },
-        (_, x) => new paper.Point(x, Math.sin(x / 10))
+        (_, x) => new paper.Point(x, Math.sin(x / 15) / 2)
     );
 
 const flat = () =>
@@ -21,56 +28,107 @@ const flat = () =>
 const noise = () =>
     Array.from(
         { length: paper.view.viewSize.width },
-        (_, x) => new paper.Point(x, Math.random())
+        (_, x) => new paper.Point(x, (Math.random() * 2 - 1) / 2)
     );
 
 const paperCanvas = (canvas: HTMLCanvasElement) => {
     paper.setup(canvas);
+    const tool = new paper.Tool();
+
     const path = new paper.Path({ strokeColor: "black" });
+    let startLinePath = new paper.Path.Line(
+        new paper.Point(startX, 0),
+        new paper.Point(startX, paper.view.viewSize.height)
+    );
+    startLinePath.strokeColor = new paper.Color("red");
+
+    let endLinePath = new paper.Path.Line(
+        new paper.Point(endX, 0),
+        new paper.Point(endX, paper.view.viewSize.height)
+    );
+    endLinePath.strokeColor = new paper.Color("red");
 
     const drawSegmentsFromPoints = (points: paper.Point[]) => {
         path.removeSegments();
         points.forEach((point) => (waveform[point.x] = point));
         waveform.forEach((point) =>
             path.add(
-                point
-                    .multiply(new paper.Point(1, 10))
-                    .add(
-                        new paper.Point(
-                            0,
-                            Math.round(paper.view.viewSize.height / 2)
-                        )
-                    )
+                new paper.Point(
+                    point.x,
+                    map(point.y, -1, 1, 0, paper.view.viewSize.height)
+                )
             )
         );
+    };
+
+    tool.onKeyDown = (event: paper.KeyEvent) => {
+        const speed = 3;
+        if (event.key === RIGHT) {
+            startX += speed;
+            endX += speed;
+        } else if (event.key === LEFT) {
+            startX -= speed;
+            endX -= speed;
+        } else if (event.key === UP) {
+            startX -= speed;
+            endX += speed;
+        } else if (event.key === DOWN) {
+            startX += speed;
+            endX -= speed;
+        }
+        // TODO: feels unneccessary to remove and redraw everything
+        startLinePath.removeSegments();
+        startLinePath = new paper.Path.Line(
+            new paper.Point(startX, 0),
+            new paper.Point(startX, paper.view.viewSize.height)
+        );
+        startLinePath.strokeColor = new paper.Color("red");
+
+        endLinePath.removeSegments();
+        endLinePath = new paper.Path.Line(
+            new paper.Point(endX, 0),
+            new paper.Point(endX, paper.view.viewSize.height)
+        );
+        endLinePath.strokeColor = new paper.Color("red");
+        beep();
+    };
+
+    tool.onKeyUp = (event: paper.KeyEvent) => {
+        if ([UP, RIGHT, DOWN, LEFT].includes(event.key)) {
+            beep();
+        }
     };
 
     let points: Array<paper.Point> = [];
     paper.view.onMouseDown = (event: paper.MouseEvent) => (points = []);
 
     paper.view.onMouseDrag = (event: paper.ToolEvent) => {
+        // TODO: manual smoothing of points that are in between,
+        // i.e. smooth idx 2 for points with x values [0, 1, 3, 5]
         points.push(event.point);
         const normalizedPoints = points.map(
             (point) =>
                 new paper.Point(
                     point.x,
-                    map(point.y, 0, paper.view.viewSize.height, -10, 10)
+                    map(point.y, 0, paper.view.viewSize.height, -1, 1)
                 )
         );
         drawSegmentsFromPoints(normalizedPoints);
     };
 
     paper.view.onMouseUp = (event: paper.MouseEvent) => {
+        // path.simplify();
+        // path.smooth({ type: "continuous" });
         beep();
     };
 
-    drawSegmentsFromPoints(noise());
+    drawSegmentsFromPoints(sine());
 
     // set up buttons
     const clearButton = document.querySelector("#clear");
     if (clearButton) {
         clearButton.addEventListener("click", () => {
-            drawSegmentsFromPoints(sine());
+            drawSegmentsFromPoints(flat());
             beep();
         });
     }
@@ -108,16 +166,16 @@ const beep = () => {
         audioCtx.sampleRate
     );
 
-    const samples = waveform.map((point) => point.y);
-    const mirroredSamples = samples.concat([...samples].reverse());
+    const samples = waveform.map((point) => point.y).slice(startX, endX);
+    // const mirroredSamples = samples.concat([...samples].reverse());
     for (let channel = 0; channel < channels; channel++) {
         let nowBuffering = audioBuffer.getChannelData(channel);
         for (let i = 0; i < frameCount; i++) {
-            nowBuffering[i] = mirroredSamples[i % mirroredSamples.length];
+            nowBuffering[i] = samples[i % samples.length];
         }
     }
 
-    audioSource.loop = true;
+    audioSource.loop = false;
     audioSource.buffer = audioBuffer;
     audioSource.connect(audioCtx.destination);
     audioSource.start();

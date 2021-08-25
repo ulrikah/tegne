@@ -5,6 +5,7 @@
 
 <button id="play">Turn up the volume</button>
 <button id="clear">Clear</button>
+
 {#if !resize}
     <canvas use:paperCanvas />
 {:else}
