@@ -1,8 +1,7 @@
 import paper from "paper";
 
 let waveform: Array<paper.Point> = [];
-let startX: number = 400,
-    endX: number = startX + 300;
+let startX: number, endX: number;
 const sampleRate = 22050;
 let audioCtx: AudioContext;
 let audioSource: AudioBufferSourceNode;
@@ -35,9 +34,12 @@ const paperCanvas = (canvas: HTMLCanvasElement) => {
     paper.setup(canvas);
     const tool = new paper.Tool();
 
+    startX = paper.view.viewSize.width / 5;
+    endX = (paper.view.viewSize.width / 5) * 2;
+
     const instructionText = new paper.PointText({
         point: new paper.Point(
-            paper.view.viewSize.width / 10,
+            paper.view.viewSize.width / 50,
             paper.view.viewSize.height / 10
         ),
         content:
