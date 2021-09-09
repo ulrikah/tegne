@@ -168,6 +168,7 @@ const beep = () => {
     }
 
     audioSource = audioCtx.createBufferSource();
+
     audioSource.onended = () => {
         console.log("AudioSource finished", new Date().toLocaleString("no-NO"));
     };
@@ -191,9 +192,17 @@ const beep = () => {
         }
     }
 
+    const gainNode = audioCtx.createGain();
+    const now = audioCtx.currentTime;
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.linearRampToValueAtTime(0.2, now);
+    gainNode.gain.linearRampToValueAtTime(1.0, now + 0.2);
+    gainNode.gain.linearRampToValueAtTime(0.0, now + audioBuffer.duration);
+
     audioSource.loop = false;
     audioSource.buffer = audioBuffer;
-    audioSource.connect(audioCtx.destination);
+    audioSource.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
     audioSource.start();
 };
 
