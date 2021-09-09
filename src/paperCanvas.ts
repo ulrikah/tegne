@@ -89,6 +89,11 @@ const paperCanvas = (canvas: HTMLCanvasElement) => {
             startX += speed;
             endX -= speed;
         }
+        if (startX < 0) startX = 0;
+        if (endX > paper.view.viewSize.width) endX = paper.view.viewSize.width;
+        if (startX >= endX + speed) startX = endX - speed;
+        if (endX <= startX + speed) endX = startX + speed;
+
         // TODO: feels unneccessary to remove and redraw everything
         startLinePath.removeSegments();
         startLinePath = new paper.Path.Line(
