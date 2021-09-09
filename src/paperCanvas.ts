@@ -140,14 +140,21 @@ const paperCanvas = (canvas: HTMLCanvasElement) => {
 
     drawSegmentsFromPoints(sine());
 
-    // set up buttons
-    const clearButton = document.querySelector("#clear");
-    if (clearButton) {
-        clearButton.addEventListener("click", () => {
-            drawSegmentsFromPoints(flat());
+    // connect all the buttons
+    const connectButtonIdToWaveshaper = (
+        id: string,
+        waveformShaper: () => paper.Point[]
+    ) => {
+        const button = document.getElementById(id);
+        button.addEventListener("click", () => {
+            drawSegmentsFromPoints(waveformShaper());
             beep();
         });
-    }
+    };
+    connectButtonIdToWaveshaper("sine", sine);
+    connectButtonIdToWaveshaper("noise", noise);
+    connectButtonIdToWaveshaper("flat", flat);
+
     const playButton = document.querySelector("#play");
     if (playButton) {
         playButton.addEventListener("click", () => {

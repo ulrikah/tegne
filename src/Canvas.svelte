@@ -3,8 +3,16 @@
     import paperCanvas from "./paperCanvas.ts";
 </script>
 
-<button id="play">Turn up the volume</button>
-<button id="clear">Clear</button>
+<div class="header">
+    <div>
+        <button id="play">Turn up the volume</button>
+    </div>
+    <div>
+        <button id="sine">sine</button>
+        <button id="noise">noise</button>
+        <button id="flat">flat</button>
+    </div>
+</div>
 
 {#if !resize}
     <canvas use:paperCanvas />
@@ -20,5 +28,10 @@
     }
     canvas {
         border: 1px solid black;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
     }
 </style>
