@@ -12,6 +12,9 @@
         <button id="noise">noise</button>
         <button id="flat">flat</button>
     </div>
+    <div>
+        <button id="help">❓❓❓</button>
+    </div>
 </div>
 
 {#if !resize}

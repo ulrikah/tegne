@@ -43,7 +43,7 @@ const paperCanvas = (canvas: HTMLCanvasElement) => {
             paper.view.viewSize.height / 10
         ),
         content:
-            "Press the canvas to draw new waveforms.\nUse the arrow keys to move the sample slice",
+            "Interact with the canvas to draw new waveforms.\nUse the arrow keys to move the sample slice",
         justification: "left",
         fontSize: 15,
     });
@@ -159,6 +159,13 @@ const paperCanvas = (canvas: HTMLCanvasElement) => {
     connectButtonIdToWaveshaper("sine", sine);
     connectButtonIdToWaveshaper("noise", noise);
     connectButtonIdToWaveshaper("flat", flat);
+
+    const button = document.getElementById("help");
+    button.addEventListener("click", () => {
+        if (instructionText) {
+            instructionText.visible = !instructionText.visible;
+        }
+    });
 
     const playButton = document.querySelector("#play");
     if (playButton) {
