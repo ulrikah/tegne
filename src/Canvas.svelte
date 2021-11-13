@@ -5,7 +5,7 @@
 
 <div class="header">
     <div>
-        <button id="play">Turn up the volume</button>
+        <button id="play">Start audio playback 🎧</button>
     </div>
     <div>
         <button id="sine">sine</button>
